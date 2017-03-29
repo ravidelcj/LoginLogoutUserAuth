@@ -84,3 +84,18 @@ func CheckPassword(user model.User) error {
 		return nil
 	}
 }
+
+func GetUserDetail(user model.User) (model.User, error) {
+
+	query := "Select first_name, last_name, session_id from users where username = '" + user.Username + "';"
+
+	err := Db.QueryRow(query).Scan(&user.FirstName, &user.LastName, &user.SessionId)
+
+	if err != nil {
+		fmt.Println(err)
+		return user, err
+	}
+
+	return user, nil
+
+}

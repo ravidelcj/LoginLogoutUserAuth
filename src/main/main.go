@@ -4,12 +4,14 @@ import (
 	"databaseHelper"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/sessions"
 	"golang.org/x/crypto/bcrypt"
 	"model"
 	"net/http"
 )
 
 var jsonMap = make(map[string]interface{})
+var store = sessions.NewCookieStore([]byte("2E9659B26A7E34A3DF672A8BF1613"))
 
 //Helper method to initialise jsonMap with status and message
 func initjsonMap(status int, message string) {
@@ -146,6 +148,29 @@ func login(res http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(res).Encode(jsonMap)
 		return
 	}
+
+	fmt.Println("User Authenticated")
+
+	user, err = databaseHelper.GetUserDetail(user)
+
+	if err != nil {
+		fmt.Println("Error in retreiving file , database error")
+		initjsonMap(0, "Error in retreiving file , database error")
+		json.NewEncoder(res).Encode(jsonMap)
+		return
+	}
+
+	session, errSession := store.Get(req, "session")
+	if errSession != nil {
+		fmt.Println("Session from client cannot be decoded : invalid session ")
+		fmt.Println(errSession)
+		initjsonMap(0, "Session from client cannot be decoded : invalid session ")
+		json.NewEncoder(res).Encode(jsonMap)
+		return
+	}
+	store.MaxAge(60)
+	session.Values["session-id"] = user.SessionId
+	session.Save(req, res)
 
 	initjsonMap(1, "User Authenticated")
 	json.NewEncoder(res).Encode(jsonMap)
