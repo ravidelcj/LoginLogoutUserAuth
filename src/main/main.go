@@ -168,10 +168,19 @@ func login(res http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(res).Encode(jsonMap)
 		return
 	}
-	store.MaxAge(60)
+
+	err = databaseHelper.AddSessionToDb(user.SessionId)
+
+	if err != nil {
+		fmt.Println("Error in adding session-id to database")
+		initjsonMap(0, "Error in adding session-id to database")
+		json.NewEncoder(res).Encode(jsonMap)
+		return
+
+	}
+
 	session.Values["session-id"] = user.SessionId
 	session.Save(req, res)
-
 	initjsonMap(1, "User Authenticated")
 	json.NewEncoder(res).Encode(jsonMap)
 

@@ -99,3 +99,23 @@ func GetUserDetail(user model.User) (model.User, error) {
 	return user, nil
 
 }
+
+func AddSessionToDb(sessionId string) error {
+
+	stmt, err := Db.Prepare("Insert into session SET session_id = ?")
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, err = stmt.Exec(sessionId)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
+
+}
