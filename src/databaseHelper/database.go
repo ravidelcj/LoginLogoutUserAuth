@@ -119,3 +119,38 @@ func AddSessionToDb(sessionId string) error {
 	return nil
 
 }
+
+func DeleteSessionFromDb(sessionId string) error {
+
+	stmt, err := Db.Prepare("Delete from session where session_id = ?")
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	_, err = stmt.Exec(sessionId)
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+}
+
+func CheckSessionExistInDb(sessionId string) bool {
+
+	query := "Select exists( Select 1 from session where session_id = '" + sessionId + "');"
+
+	var exist bool
+
+	err := Db.QueryRow(query).Scan(&exist)
+
+	if err != nil {
+		fmt.Println(err)
+		return true
+	}
+
+	return exist
+
+}

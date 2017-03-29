@@ -149,8 +149,6 @@ func login(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println("User Authenticated")
-
 	user, err = databaseHelper.GetUserDetail(user)
 
 	if err != nil {
@@ -159,6 +157,18 @@ func login(res http.ResponseWriter, req *http.Request) {
 		json.NewEncoder(res).Encode(jsonMap)
 		return
 	}
+
+	//Checking any other session of the user
+	exist := databaseHelper.CheckSessionExistInDb(user.SessionId)
+
+	if exist {
+		fmt.Println("A single user can have a single session")
+		initjsonMap(0, "A single user can have a single session")
+		json.NewEncoder(res).Encode(jsonMap)
+		return
+	}
+
+	fmt.Println("User Authenticated")
 
 	session, errSession := store.Get(req, "session")
 	if errSession != nil {
